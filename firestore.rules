@@ -1,0 +1,140 @@
+rules_version = '2';
+
+// Firestore rules for the diner app, the partner console and the Cloud
+// Functions (which use the Admin SDK and bypass these rules).
+// Collections are described in docs/architecture.md.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // App settings, edited by hand in the Firebase console:
+    //   env/stripe_mode  { mode: "TEST" | "LIVE" }
+    //   env/stripe_keys  { TEST: "pk_test_...", LIVE: "pk_live_..." }
+    //   env/app_version  (read by the diner app's update check)
+    match /env/{doc} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Diner profiles. Private fields live in the subcollections below.
+    match /app_users/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isUser(uid);
+
+      match /secrets/{doc} {
+        allow read, write: if isUser(uid);
+      }
+
+      match /stripe_data/{doc} {
+        allow read, write: if isUser(uid);
+      }
+
+      match /payment_methods/{doc} {
+        allow read, write: if isUser(uid);
+      }
+
+      // counters/user_following and counters/user_followed_by hold a `list`
+      // of uids. A follower may add or remove only their own uid on the
+      // followed user's `user_followed_by` document.
+      match /counters/{counter} {
+        function oldList() {
+          return resource == null ? [] : resource.data.get('list', []);
+        }
+        function newList() {
+          return request.resource.data.get('list', []);
+        }
+
+        allow read: if isSignedIn();
+        allow create, update: if isUser(uid)
+          || (counter == 'user_followed_by'
+            && isSignedIn()
+            && request.resource.data.keys().hasOnly(['list'])
+            && newList().toSet().difference(oldList().toSet()).hasOnly([request.auth.uid])
+            && oldList().toSet().difference(newList().toSet()).hasOnly([request.auth.uid]));
+      }
+
+      match /user_following/{targetUid} {
+        allow read: if isSignedIn();
+        allow create, update: if isUser(uid);
+      }
+
+      match /user_followed_by/{followerUid} {
+        allow read: if isSignedIn();
+        allow create, update: if isUser(followerUid) || isUser(uid);
+      }
+    }
+
+    // Restaurant accounts: the document id is the partner's auth uid.
+    match /restaurant_accounts/{restaurantUid} {
+      allow read;
+      allow create, update: if isUser(restaurantUid);
+
+      match /menu/{itemId} {
+        allow read;
+        allow write: if isUser(restaurantUid);
+      }
+
+      // A diner applies to become a repeater (document id = diner uid);
+      // the restaurant approves or rejects.
+      match /repeaters/{uid} {
+        allow read: if isSignedIn();
+        allow create, update: if isUser(uid) || isUser(restaurantUid);
+      }
+
+      // Every signed-in diner can list a restaurant's orders: the restaurant
+      // page shows what was ordered today.
+      match /customer_orders/{orderId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn()
+          && request.resource.data.orderedBy == request.auth.uid
+          && request.resource.data.restaurantUid == restaurantUid;
+        allow update: if isUser(restaurantUid);
+
+        match /menuItems/{itemId} {
+          allow read: if isSignedIn();
+          allow create: if isSignedIn()
+            && request.resource.data.orderedBy == request.auth.uid;
+          allow update: if isUser(restaurantUid);
+        }
+      }
+    }
+
+    // Collection-group queries: a diner's order history and affiliate rewards.
+    match /{path=**}/customer_orders/{orderId} {
+      allow read: if isSignedIn();
+    }
+
+    match /{path=**}/menuItems/{itemId} {
+      allow read: if isSignedIn();
+    }
+
+    // Dish posts by diners, indexed into Algolia by the Cloud Functions.
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.postedBy == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.postedBy == request.auth.uid
+        && request.resource.data.postedBy == request.auth.uid;
+    }
+
+    match /abuse_reports/{reportId} {
+      allow create: if isSignedIn();
+    }
+
+    // Read by the diner app; nothing in this repository writes them.
+    match /creator_mona_menu/{doc} {
+      allow read: if isSignedIn();
+    }
+
+    match /mona_menu_follow_relationship/{doc} {
+      allow read: if isSignedIn();
+    }
+  }
+}

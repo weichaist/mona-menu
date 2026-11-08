@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Cloud Storage rules. The apps upload to:
+//   app_users/{uid}/profile/...        diner profile pictures and post photos
+//   restaurant_accounts/{uid}/...      console profile, background and dish photos
+// Images are displayed through download URLs.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isUser(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /app_users/{uid}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if isUser(uid);
+    }
+
+    match /restaurant_accounts/{uid}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if isUser(uid);
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "FIREBASE_PROJECT_ID": "your-firebase-project-id",
+  "FIREBASE_MESSAGING_SENDER_ID": "000000000000",
+  "FIREBASE_STORAGE_BUCKET": "your-firebase-project-id.firebasestorage.app",
+  "FIREBASE_ANDROID_API_KEY": "your-firebase-android-api-key",
+  "FIREBASE_ANDROID_APP_ID": "1:000000000000:android:0000000000000000000000",
+  "FIREBASE_IOS_API_KEY": "your-firebase-ios-api-key",
+  "FIREBASE_IOS_APP_ID": "1:000000000000:ios:0000000000000000000000",
+  "ALGOLIA_APP_ID": "YOUR_ALGOLIA_APP_ID",
+  "ALGOLIA_SEARCH_KEY": "your-algolia-search-only-api-key",
+  "APPLE_MERCHANT_ID": "merchant.app.mona",
+  "SHARE_BASE_URL": "https://example.com",
+  "TERMS_URL": "https://example.com/terms"
+}
