@@ -1,4 +1,12 @@
+<p align="right"><b>English</b> | <a href="README.ja.md">日本語</a></p>
+
 # Mona Menu — mobile order reimagined
+
+[![CI](https://github.com/weichaist/mona-menu/actions/workflows/ci.yml/badge.svg)](https://github.com/weichaist/mona-menu/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Flutter 3.47](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter)
+![Firebase](https://img.shields.io/badge/Firebase-Functions%20v2-FFCA28?logo=firebase&logoColor=black)
+![Stripe](https://img.shields.io/badge/payments-Stripe-635BFF?logo=stripe&logoColor=white)
 
 Mona Menu is a mobile ordering system for restaurants with a social layer.
 Diners open a restaurant's page, browse its menu and the dish photos other
@@ -7,6 +15,33 @@ Apple Pay). After eating they can post their own photos of a dish and share
 the post. Restaurant partners run a tablet console to handle orders and
 refunds, see order history, approve regular customers, and edit their menus,
 business hours, tables and profile.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/feed.jpg" alt="Restaurant page with live orders and dish posts" width="160"><br><sub>A new way to order</sub></td>
+    <td align="center"><img src="docs/images/live-orders.jpg" alt="Live orders" width="160"><br><sub>Live orders: see what's popular right now</sub></td>
+    <td align="center"><img src="docs/images/following-choices.jpg" alt="What the people you follow chose" width="160"><br><sub>Order what the people you follow chose</sub></td>
+    <td align="center"><img src="docs/images/repeaters.jpg" alt="Repeaters' favorites" width="160"><br><sub>Become a restaurant's certified repeater</sub></td>
+    <td align="center"><img src="docs/images/post-a-dish.jpg" alt="Posting a dish" width="160"><br><sub>Post the dishes you recommend</sub></td>
+  </tr>
+</table>
+
+<sub>Screenshots from the released diner app (2021–2022).</sub>
+
+## Features
+
+- **Restaurant pages with a social layer**: tabs for the in-store menu,
+  the latest posts, repeaters' recommendations and what the people you follow
+  ordered, plus a live strip of what was just ordered.
+- **Order from the table and pay in the app** with Stripe: saved cards and
+  Apple Pay.
+- **Dish posts**: diners post photos and a short review of what they ate and
+  share the post with a link. Posts are searchable (Algolia).
+- **Repeaters**: diners apply to be a restaurant's regular, and the
+  restaurant approves them in the console.
+- **Partner console** for tablets: incoming orders and refunds, order
+  history, regular customers, menus, business hours, tables and profile.
+- **Japanese and English** in the diner app.
 
 The repository holds three parts that share one Firebase project:
 
